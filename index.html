@@ -41,6 +41,27 @@
 
         <!-- Main Content -->
         <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Ticket Stats Tab -->
+            <div id="ticketStatsTab" class="block mb-8">
+                <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-8 flex flex-col md:flex-row justify-between items-center">
+                        <div class="mb-4 md:mb-0">
+                            <h3 class="text-xl font-semibold text-blue-800 mb-2">Ticket Stats</h3>
+                            <div class="flex space-x-8">
+                                <div>
+                                    <span class="text-lg text-green-700 font-bold" id="resolvedTicketsTab">0</span>
+                                    <span class="text-gray-700 ml-1">Resolved</span>
+                                </div>
+                                <div>
+                                    <span class="text-lg text-yellow-700 font-bold" id="pendingTicketsTab">0</span>
+                                    <span class="text-gray-700 ml-1">Pending</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Home Page -->
             <div id="homePage" class="block">
                 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden mb-8">
@@ -378,17 +399,16 @@
             </div>
         </footer>
     </div>
-
     <script>
         // TODO: Replace the config below with your Firebase project config!
         const firebaseConfig = {
-            apiKey: "AIzaSyDrVc3QGp8ecxCfDI5cD5JCpmlMkyl3hN4",
-            authDomain: "database-6fc5f.firebaseapp.com",
-            databaseURL: "https://database-6fc5f-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "database-6fc5f",
-            storageBucket: "database-6fc5f.firebasestorage.app",
-            messagingSenderId: "529367864066",
-            appId: "1:529367864066:web:526ad3fffaa89d17e9281b"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -467,6 +487,7 @@
                 } else {
                     showSuccessModal('Ticket Submitted', `Your ticket has been submitted successfully. Your ticket ID is: ${ticketId}`);
                     document.getElementById('ticketForm').reset();
+                    updateTicketStatsTab();
                     setTimeout(() => {
                         showPage('homePage');
                     }, 3000);
@@ -587,6 +608,7 @@
                             displayTicketDetails(ticket);
                             document.getElementById('replyMessage').value = '';
                             showSuccessModal('Reply Sent', 'Your reply has been sent successfully.');
+                            updateTicketStatsTab();
                         }
                     });
                 }
@@ -629,6 +651,19 @@
             }
         }
 
+        function updateTicketStatsTab() {
+            db.ref('tickets').once('value', (snapshot) => {
+                let resolved = 0, pending = 0;
+                snapshot.forEach(child => {
+                    const t = child.val();
+                    if (t.status === 'Resolved' || t.status === 'Closed') resolved++;
+                    else pending++;
+                });
+                document.getElementById('resolvedTicketsTab').textContent = resolved;
+                document.getElementById('pendingTicketsTab').textContent = pending;
+            });
+        }
+
         function loadAdminDashboard() {
             db.ref('tickets').once('value', (snapshot) => {
                 tickets = [];
@@ -642,6 +677,7 @@
                 document.getElementById('pendingTickets').textContent = pendingTickets;
                 document.getElementById('resolvedTickets').textContent = resolvedTickets;
                 loadTicketsTable();
+                updateTicketStatsTab();
             });
         }
 
@@ -688,6 +724,7 @@
                         <td class="py-3 px-4 text-sm">${formatDate(ticket.createdAt).split(' ')[0]}</td>
                         <td class="py-3 px-4 text-sm">
                             <button class="view-ticket-btn text-blue-600 hover:text-blue-800" data-ticket-id="${ticket.id}">View</button>
+                            ${adminLoggedIn ? `<button class="delete-ticket-btn text-red-600 hover:text-red-800 ml-2" data-ticket-id="${ticket.id}">Delete</button>` : ""}
                         </td>
                     </tr>
                 `;
@@ -699,6 +736,27 @@
                     viewTicketAsAdmin(ticketId);
                 });
             });
+            if (adminLoggedIn) {
+                document.querySelectorAll('.delete-ticket-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const ticketId = this.getAttribute('data-ticket-id');
+                        deleteTicket(ticketId);
+                    });
+                });
+            }
+        }
+
+        function deleteTicket(ticketId) {
+            if (!confirm('Are you sure you want to delete this ticket? This cannot be undone.')) return;
+            db.ref('tickets/' + ticketId).remove()
+                .then(() => {
+                    showSuccessModal('Ticket Deleted', 'The ticket was deleted successfully.');
+                    loadAdminDashboard();
+                    updateTicketStatsTab();
+                })
+                .catch(() => {
+                    showErrorModal('Error', 'Could not delete the ticket.');
+                });
         }
 
         function filterTickets() {
@@ -812,6 +870,8 @@
                         displayAdminTicketDetails(ticket);
                         showSuccessModal('Ticket Updated', 'Ticket updated successfully.');
                         document.getElementById('adminReply').value = '';
+                        loadAdminDashboard();
+                        updateTicketStatsTab();
                     }
                 });
             });
@@ -850,6 +910,7 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             updateAdminHeader();
+            updateTicketStatsTab();
             // Navigation
             document.getElementById('loginBtn')?.addEventListener('click', () => showPage('adminLoginPage'));
             document.getElementById('newTicketBtn').addEventListener('click', () => showPage('newTicketPage'));
