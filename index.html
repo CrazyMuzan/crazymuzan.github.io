@@ -67,7 +67,7 @@
                 <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden mb-8">
                     <div class="p-8">
                         <h2 class="text-2xl font-semibold text-blue-800 mb-4">Welcome to FPFMNHS Support System</h2>
-                        <p class="text-gray-600 mb-6">This platform allows teachers to submit anonymous support tickets and follow up on their status.</p>
+                        <p class="text-gray-600 mb-6">This platform allows teachers to submit support tickets and follow up on their status.</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
                                 <h3 class="text-xl font-medium text-blue-800 mb-3">Submit a New Ticket</h3>
@@ -101,12 +101,13 @@
                                     <option value="Facility Issue">Facility Issue</option>
                                     <option value="Administrative">Administrative</option>
                                     <option value="Classroom Resources">Classroom Resources</option>
+                                    <option value="Finance Office">Finance Office</option>
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="ticketSubject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                                <input type="text" id="ticketSubject" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Brief description">
+                                <label for="ticketName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <input type="text" id="ticketName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Full Name">
                             </div>
                             <div>
                                 <label for="ticketDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -243,6 +244,7 @@
                                     <option value="Facility Issue">Facility Issue</option>
                                     <option value="Administrative">Administrative</option>
                                     <option value="Classroom Resources">Classroom Resources</option>
+                                    <option value="Finance Office">Finance Office</option>
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
@@ -252,7 +254,7 @@
                                 <thead class="bg-gray-100">
                                     <tr>
                                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">ID</th>
-                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">Subject</th>
+                                        <th class="py-3 px-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">Name</th>
                                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">Category</th>
                                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">Priority</th>
                                         <th class="py-3 px-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">Status</th>
@@ -456,10 +458,10 @@
         function submitTicket(e) {
             e.preventDefault();
             const category = document.getElementById('ticketCategory').value;
-            const subject = document.getElementById('ticketSubject').value;
+            const name = document.getElementById('ticketName').value;
             const description = document.getElementById('ticketDescription').value;
             const priority = document.getElementById('ticketPriority').value;
-            if (!category || !subject || !description) {
+            if (!category || !name || !description) {
                 showErrorModal('Missing Information', 'Please fill in all required fields.');
                 return;
             }
@@ -467,7 +469,7 @@
             const newTicket = {
                 id: ticketId,
                 category,
-                subject,
+                name,
                 description,
                 priority,
                 status: 'Open',
@@ -528,7 +530,7 @@
                 <div class="bg-gray-50 p-6 rounded-lg">
                     <div class="flex flex-wrap justify-between mb-4">
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-800">${ticket.subject}</h3>
+                            <h3 class="text-xl font-semibold text-gray-800">${ticket.name}</h3>
                             <p class="text-gray-500">Ticket ID: ${ticket.id}</p>
                         </div>
                         <div class="flex space-x-2">
@@ -716,7 +718,7 @@
                 html += `
                     <tr class="hover:bg-gray-50">
                         <td class="py-3 px-4 text-sm">${ticket.id}</td>
-                        <td class="py-3 px-4 text-sm">${ticket.subject}</td>
+                        <td class="py-3 px-4 text-sm">${ticket.name}</td>
                         <td class="py-3 px-4 text-sm">${ticket.category}</td>
                         <td class="py-3 px-4 text-sm"><span class="px-2 py-1 rounded-full text-xs font-medium ${priorityClass}">${ticket.priority}</span></td>
                         <td class="py-3 px-4 text-sm"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">${ticket.status}</span></td>
@@ -794,7 +796,7 @@
                 <div class="bg-gray-50 p-6 rounded-lg">
                     <div class="flex flex-wrap justify-between mb-4">
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-800">${ticket.subject}</h3>
+                            <h3 class="text-xl font-semibold text-gray-800">${ticket.name}</h3>
                             <p class="text-gray-500">Ticket ID: ${ticket.id}</p>
                         </div>
                         <div class="flex space-x-2">
